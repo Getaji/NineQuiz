@@ -1,11 +1,13 @@
 package mw.ninequiz.src;
 
+import java.util.Objects;
+
 /**
  * NineQuizのロジックで用いる各種オブジェクトを生成します.
  */
-public class NineQuizFactory {
+/* package private */ class NineQuizUtil {
 
-    private NineQuizFactory() {}
+    private NineQuizUtil() {}
 
     /**
      * 問題番号をフォーマットして返します.<br />
@@ -36,12 +38,16 @@ public class NineQuizFactory {
      * @return 結果
      */
     public static String join(String character, Object... list) {
+        Objects.requireNonNull(character);
+        Objects.requireNonNull(list);
+
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < list.length - 1; ++i) {
             builder.append(list[i]);
             builder.append(character);
         }
         builder.append(list[list.length - 1]);
+
         return builder.toString();
     }
 

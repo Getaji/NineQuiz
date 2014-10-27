@@ -65,6 +65,7 @@ public class QuizLogic {
             System.out.println("\n");
         }
         viewResult(answers);
+        scanner.close();
     }
 
     /**
@@ -73,14 +74,14 @@ public class QuizLogic {
      * @param question 問題
      */
     protected void viewQuestion(int number, Question question) {
-        System.out.print(NineQuizFactory.createFormattedStatementNumber(
+        System.out.print(NineQuizUtil.createFormattedStatementNumber(
                 number, model.getQuestionNumberText()));
-        System.out.println(question.getStatement());
+        System.out.println(question.getQuestionStatement());
         for (int i = 0; i < question.getChoiceCount(); ++i) {
-            System.out.print(NineQuizFactory.createFormattedChoiceNumber(
+            System.out.print(NineQuizUtil.createFormattedChoiceNumber(
                     i + 1, model.getQuestionChoiceNumberText()
             ));
-            System.out.println(question.getChoices()[i]);
+            System.out.println(question.getQuestionChoices()[i]);
         }
     }
 
@@ -90,7 +91,7 @@ public class QuizLogic {
      */
     protected void viewResult(boolean[] answers) {
         System.out.println("[RESULT]");
-        System.out.println(NineQuizFactory.createTransferredAnswers(
+        System.out.println(NineQuizUtil.createTransferredAnswers(
                 model.getSimpleCorrect(), model.getSimpleIncorrect(), answers));
     }
 
