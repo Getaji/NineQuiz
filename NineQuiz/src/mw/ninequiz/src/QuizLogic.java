@@ -1,6 +1,6 @@
 package mw.ninequiz.src;
 
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * NineQuizのロジックです.<br />
@@ -8,19 +8,25 @@ import java.util.Scanner;
  */
 public class QuizLogic {
 
-    private final NineQuizModel model;
+    public static QuizLogic of(Collection<Question> questions) {
+        return new QuizLogic(questions, new NineQuizData());
+    }
 
-    private final QuestionList questions;
+    public static QuizLogic of(Collection<Question> questions, NineQuizData model) {
+        return new QuizLogic(questions, model);
+    }
 
+    private final NineQuizData model;
     private final Scanner scanner = new Scanner(System.in);
+    private final Collection<Question> questions;
 
     /**
      * 問題を渡して初期化します.
      * @param questions 問題
      */
-    public QuizLogic(QuestionList questions) {
+    private QuizLogic(Collection<Question> questions, NineQuizData model) {
         this.questions = questions;
-        this.model = new NineQuizModel();
+        this.model = model;
     }
 
     /**
@@ -45,26 +51,26 @@ public class QuizLogic {
     }
 
     /**
-     * クイズを出題し解答を要求するロジックです.
+     * クイズを出題し解答を要求するロジック。
      */
     protected void run() {
-        boolean[] answers = new boolean[questions.getQuestionCount()];
-        for (int i = 0; i < questions.getQuestionCount(); ++i) {
-            Question question = questions.getQuestion(i);
+        List<JudgeType> judgedList = new ArrayList<>(questions.size());
+        Iterator<Question> questionIterator = questions.iterator();
+
+        for (int i = 0; questionIterator.hasNext(); ++i) {
+            Question question = questionIterator.next();
             viewQuestion(i, question);
 
             System.out.print(">");
-            int answer = scanner.nextInt();
-            if (answer == question.getAnswer()) {
-                System.out.println(model.getQuestionIsCorrect());
-                answers[i] = true;
-            } else {
-                System.out.println(model.getQuestionIsIncorrect());
-                answers[i] = false;
-            }
-            System.out.println("\n");
+
+            final int answer = scanner.nextInt();
+            final JudgeType judge = (answer == question.getAnswerIndex()) ?
+                                     JudgeType.CORRECT :
+                                     JudgeType.INCORRECT;
+            System.out.println(judge.toString(model) + "\n");
+            judgedList.add(judge);
         }
-        viewResult(answers);
+        viewResult(judgedList);
         scanner.close();
     }
 
@@ -75,31 +81,33 @@ public class QuizLogic {
      */
     protected void viewQuestion(int number, Question question) {
         System.out.print(NineQuizUtil.createFormattedStatementNumber(
-                number, model.getQuestionNumberText()));
+                number + 1, model.getQuestionNumberText()));
         System.out.println(question.getQuestionStatement());
-        for (int i = 0; i < question.getChoiceCount(); ++i) {
+
+        Iterator<String> questionChoicesIterator = question.getQuestionChoices().iterator();
+
+        for (int i = 0; questionChoicesIterator.hasNext(); ++i) {
             System.out.print(NineQuizUtil.createFormattedChoiceNumber(
                     i + 1, model.getQuestionChoiceNumberText()
             ));
-            System.out.println(question.getQuestionChoices()[i]);
+            System.out.println(questionChoicesIterator.next());
         }
     }
 
     /**
      * 結果を表示します.
-     * @param answers 解答
+     * @param judges 解答
      */
-    protected void viewResult(boolean[] answers) {
-        System.out.println("[RESULT]");
-        System.out.println(NineQuizUtil.createTransferredAnswers(
-                model.getSimpleCorrect(), model.getSimpleIncorrect(), answers));
+    protected void viewResult(Collection<JudgeType> judges) {
+        System.out.println("[結果発表]"); // TODO Modelに突っ込め
+        System.out.println(NineQuizUtil.createTransferredAnswers(judges, model));
     }
 
     /**
      * データモデルを返します.
      * @return データモデル
      */
-    public NineQuizModel getModel() {
+    public NineQuizData getModel() {
         return model;
     }
 
@@ -108,6 +116,6 @@ public class QuizLogic {
      * @return 問題数
      */
     public int getQuestionCount() {
-        return questions.getQuestionCount();
+        return questions.size();
     }
 }

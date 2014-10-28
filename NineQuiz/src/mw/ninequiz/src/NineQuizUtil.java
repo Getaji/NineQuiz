@@ -1,5 +1,8 @@
 package mw.ninequiz.src;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -24,11 +27,11 @@ import java.util.Objects;
      * 選択肢番号をフォーマットして返します.<br />
      * <code>"{num}"</code>が選択肢番号に置換されます.
      * @param number 選択肢番号
-     * @param unFormat 未フォーマット文字列
+     * @param unFormatted 未フォーマット文字列
      * @return フォーマットされた文字列
      */
-    public static String createFormattedChoiceNumber(int number, String unFormat) {
-        return unFormat.replace("{num}", String.valueOf(number));
+    public static String createFormattedChoiceNumber(int number, String unFormatted) {
+        return unFormatted.replace("{num}", String.valueOf(number));
     }
 
     /**
@@ -59,11 +62,11 @@ import java.util.Objects;
      * @param answers 解答リスト
      * @return 結果
      */
-    public static String createTransferredAnswers(String correct, String incorrect, boolean[] answers) {
-        String[] charAnswers = new String[answers.length];
-        for (int i = 0; i < answers.length; ++i) {
-            charAnswers[i] = answers[i] ? correct : incorrect;
+    public static String createTransferredAnswers(Collection<JudgeType> judges, NineQuizData model) {
+        List<String> answers = new ArrayList<>(judges.size());
+        for (JudgeType judge : judges) {
+            answers.add(judge.toString(model));
         }
-        return join(", ", charAnswers);
+        return join(", ", answers);
     }
 }

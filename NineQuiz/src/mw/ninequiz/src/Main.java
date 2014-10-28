@@ -1,22 +1,30 @@
 package mw.ninequiz.src;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * コアクラス.
  */
 public class Main {
 
     public static void main(String[] args) {
-        QuestionList questions = new QuestionList(
-                new Question("Javaの型付けは何ですか？", 1,
-                        "静的型付け",
-                        "動的型付け",
-                        "性的型付け"),
-                new Question("int型はどの種類の型ですか？", 2,
-                        "参照型",
-                        "基本型",
-                        "金剛型")
+        List<Question> questions = Arrays.asList(
+                Question.builder().setQuestionStatement("Javaの型付けは何ですか？")
+                        .addQuestionChoice("静的型付け")
+                        .addQuestionChoice("動的型付け")
+                        .addQuestionChoice("性的型付け")
+                        .setAnswerIndex(1)
+                        .build(),
+                Question.builder().setQuestionStatement("int型はどの種類の型ですか？")
+                        .addQuestionChoice("参照型")
+                        .addQuestionChoice("基本型")
+                        .addQuestionChoice("金剛型")
+                        .setAnswerIndex(2)
+                        .build()
         );
-        QuizLogic quizLogic = new QuizLogic(questions);
+        NineQuizData quizData = new NineQuizData();
+        QuizLogic quizLogic = QuizLogic.of(questions, quizData);
         quizLogic.start();
     }
 }
