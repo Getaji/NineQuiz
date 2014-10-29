@@ -36,6 +36,25 @@ public class Question {
         private QuestionBuilder() {}
 
         /**
+         * 複数の選択肢を追加します。
+         * 内部では{@link #addChoice(String)}を使用しています。詳細はそちらを参照ください。
+         *
+         * @param questionChoices 複数の選択肢
+         * @throws NullPointerException パラメータがnullの場合に送出
+         * @return return this
+         */
+        public QuestionBuilder addChoiceAll(String... questionChoices) {
+            if (questionChoices == null) {
+                throw new NullPointerException("take question choices is null");
+            }
+
+            for (String questionChoice : questionChoices) {
+                addChoice(questionChoice);
+            }
+            return this;
+        }
+
+        /**
          * 選択肢を追加します。
          * 空文字かnullが渡されると対応した例外を送出します。
          * 同じ選択肢がすでにある場合は追加されません。
