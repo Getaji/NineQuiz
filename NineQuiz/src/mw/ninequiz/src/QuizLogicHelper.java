@@ -1,16 +1,18 @@
 package mw.ninequiz.src;
 
-import java.util.ArrayList;
+import lombok.NonNull;
+
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * NineQuizのロジックで用いる各種オブジェクトを生成します.
+ * クイズロジックのヘルパークラスです。
  */
-/* package private */ class NineQuizUtil {
+public class QuizLogicHelper {
 
-    private NineQuizUtil() {}
+    private QuizLogicHelper() {}
 
     /**
      * 問題番号をフォーマットして返します.<br />
@@ -19,7 +21,8 @@ import java.util.Objects;
      * @param unFormat 未フォーマット文字列
      * @return フォーマットされた文字列
      */
-    public static String createFormattedStatementNumber(int number, String unFormat) {
+    @NonNull
+    public static String formatStatementNumber(int number, String unFormat) {
         return unFormat.replace("{num}", String.valueOf(number));
     }
 
@@ -30,7 +33,8 @@ import java.util.Objects;
      * @param unFormatted 未フォーマット文字列
      * @return フォーマットされた文字列
      */
-    public static String createFormattedChoiceNumber(int number, String unFormatted) {
+    @NonNull
+    public static String formatChoiceNumber(int number, String unFormatted) {
         return unFormatted.replace("{num}", String.valueOf(number));
     }
 
@@ -40,10 +44,8 @@ import java.util.Objects;
      * @param list 対象リスト
      * @return 結果
      */
+    @NonNull
     public static String join(String character, Object... list) {
-        Objects.requireNonNull(character);
-        Objects.requireNonNull(list);
-
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < list.length - 1; ++i) {
             builder.append(list[i]);
@@ -55,18 +57,21 @@ import java.util.Objects;
     }
 
     /**
-     * 解答リストであるbooleanの配列を指定文字に変換してカンマで区切り返します.<br />
-     * trueが正解, falseが不正解になります.
-     * @param correct 正解を表す文字
-     * @param incorrect 不正解を表す文字
-     * @param answers 解答リスト
+     * 判定のコレクションを文字列に整形します。
+     * 渡されたデータの書式に変換しカンマで区切って返します。
+     *
+     * <p>例：{@link JudgeType#CORRECT}　x2, {@link JudgeType#INCORRECT} x1, データ初期値を渡す<br>
+     * {@code "○, ○, ☓"}
+     *
+     * @param judges 判定のコレクション
+     * @param data データ
      * @return 結果
      */
-    public static String createTransferredAnswers(Collection<JudgeType> judges, NineQuizData model) {
-        List<String> answers = new ArrayList<>(judges.size());
-        for (JudgeType judge : judges) {
-            answers.add(judge.toString(model));
-        }
+    @NonNull
+    public static String formatJudges(Collection<JudgeType> judges, QuizLogicData data) {
+        final Stream<JudgeType> unFormatted = judges.stream();
+        final Stream<String> formatted = unFormatted.map(judge -> judge.toShortString(data));
+        final List<String> answers = formatted.collect(Collectors.toList());
         return join(", ", answers);
     }
 }

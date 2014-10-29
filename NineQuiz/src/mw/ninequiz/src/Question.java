@@ -1,35 +1,51 @@
 package mw.ninequiz.src;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 問題を表すクラスです。このクラスは不変で状態を持ちません。
+ * インスタンスは{@link #builder()}からビルダークラスを作成し構築することができます。
  *
- *　<h1>問題データの規則</h1>
- * これはBuilderのセッターにも記述されています。
+ *　<h1>問題データの契約</h1>
+ * これは各ゲッターやBuilderのセッターにも記述されています。
+ * ビルダークラスは契約違反が起こった場合に即座に非チェック例外を送出し、この契約を保証します。
  *
  * <ul>
- *     <li>禁止：問題文にはnullか空文字は許可されない。</li>
- *     <li>要求：正解のインデックスは選択肢の数の範囲内でなければならない。</li>
- *     <li>要求：正解のインデックスは１から始まれなければならない。</li>
- *     <li>禁止：選択肢にはnullか空文字は許可されない。</li>
- *     <li>禁止：選択肢の重複は許可されない。</li>
+ *     <li>問題文はnull・空ではない。</li>
+ *     <li>正解インデックスは1から始まり選択肢の範囲内である。</li>
+ *     <li>選択肢はnull・空ではなく重複しない。</li>
  * </ul>
  */
 public class Question {
 
+    // ================================================================
+    // Statics
+    // ================================================================
+    /**
+     * {@link Question}のインスタンスを構築するビルダークラスです。
+     * このクラスは{@link Question}の契約を保証します。
+     */
     public static class QuestionBuilder {
 
         private static final int ANSWER_INDEX_INITIAL_VALUE = -1;
 
         private String questionStatement;
         private int answerIndex = ANSWER_INDEX_INITIAL_VALUE;
-        private final Set<String> questionChoices = new LinkedHashSet<>();
+        private final List<String> questionChoices = new ArrayList<>();
 
         private QuestionBuilder() {}
 
-        public QuestionBuilder addQuestionChoice(String questionChoice) {
+        /**
+         * 選択肢を追加します。
+         * 空文字かnullが渡されると対応した例外を送出します。
+         * 同じ選択肢がすでにある場合は追加されません。
+         *
+         * @param questionChoice 選択肢
+         * @throws NullPointerException パラメータがnullの場合に送出
+         * @throws IllegalArgumentException パラメータが空文字の場合に送出
+         * @return return this
+         */
+        public QuestionBuilder addChoice(String questionChoice) {
             // 正当性検査
             if (questionChoice == null) {
                 throw new NullPointerException("take question choice is null");
@@ -39,12 +55,23 @@ public class Question {
                 throw new IllegalArgumentException("take question choice is empty");
             }
 
-            // 格納
-            questionChoices.add(questionChoice);
+            // すでになければ格納
+            if (!questionChoices.contains(questionChoice)) {
+                questionChoices.add(questionChoice);
+            }
             return this;
         }
 
-        public QuestionBuilder setQuestionStatement(String questionStatement) {
+        /**
+         * 問題文をセットします。
+         * 空文字かnullが渡されると例外を送出します。
+         *
+         * @param questionStatement 問題文
+         * @throws NullPointerException パラメータがnullの場合に送出
+         * @throws IllegalArgumentException パラメータが空文字の場合に送出
+         * @return return this
+         */
+        public QuestionBuilder setStatement(String questionStatement) {
             // 正当性検査
             if (questionStatement == null) {
                 throw new NullPointerException("Take question statement is null");
@@ -59,6 +86,14 @@ public class Question {
             return this;
         }
 
+        /**
+         * 正解のインデックスをセットします。インデックスは1から始まります。
+         * 選択肢の範囲外のインデックスが渡されると例外を送出します。
+         *
+         * @param answerIndex 正解のインデックス
+         * @throws IndexOutOfBoundsException パラメータが範囲外の場合に送出
+         * @return return this
+         */
         public QuestionBuilder setAnswerIndex(int answerIndex) {
             // 正当性検査
             if (answerIndex < 1 || questionChoices.size() + 1 < answerIndex) {
@@ -70,6 +105,20 @@ public class Question {
             return this;
         }
 
+        /**
+         * {@link Question}のインスタンスを生成して返します。
+         * 下記の契約に違反している場合は{@link IllegalStateException}を送出します。
+         *
+         * <h1>契約</h1>
+         * <ul>
+         *     <li>問題文がセットされている</li>
+         *     <li>正解のインデックスがセットされている</li>
+         *     <li>選択肢が1以上セットされている</li>
+         * </ul>
+         *
+         * @throws IllegalStateException 上記の契約に違反した場合に送出
+         * @return {@link Question}のインスタンス
+         */
         public Question build() {
             // 状態検査
             if (questionStatement == null) {
@@ -89,32 +138,56 @@ public class Question {
         }
     }
 
+    /**
+     * ビルダーを新たに生成して返します。
+     * Questionインスタンスはこのビルダーを介して生成します。
+     *
+     * @return ビルダーのインスタンス
+     */
     public static QuestionBuilder builder() {
         return new QuestionBuilder();
     }
 
+    // ================================================================
+    // Fields
+    // ================================================================
     private final String questionStatement;
 
-    private final Set<String> questionChoices;
+    // Q.なぜSetではなくListなのか
+    // A.イテレート以外で値を取得する必要があるから
+    private final List<String> questionChoices;
 
     private final int answerIndex;
 
+    // ================================================================
+    // Constructors
+    // ================================================================
     /**
-     * 初期化します。
+     * インスタンスを生成する。
+     *
      * @param questionStatement 問題文
      * @param answerIndex 正解
      * @param questionChoices 選択肢
      */
     private Question(String questionStatement, int answerIndex,
-                    Set<String> questionChoices) {
+                    Collection<String> questionChoices) {
         // 正当性はBuilderで検査されている。
         this.questionStatement = questionStatement;
-        this.questionChoices = questionChoices;
         this.answerIndex = answerIndex;
+
+        // 防御的コピー
+        this.questionChoices = new ArrayList<>();
+        this.questionChoices.addAll(questionChoices);
     }
 
+    // ================================================================
+    // Getters
+    // ================================================================
     /**
      * 問題文を返します。
+     *
+     * <p>問題文はnullや空文字が入っておらず不変であることが保証されています。
+     *
      * @return 問題文
      */
     public String getQuestionStatement() {
@@ -123,14 +196,25 @@ public class Question {
 
     /**
      * 選択肢のセットを返します。
+     * クラスの不変性を保証するため、このメソッドは呼び出されると選択肢のセットのコピーを生成して返します。
+     * キャッシュは行いません。
+     *
+     * <p>選択肢は1つ以上でnullや空文字が入っておらず不変であることが保証されています。
+     *
      * @return 選択肢のリスト
      */
     public Set<String> getQuestionChoices() {
-        return questionChoices;
+        final Set<String> defencedChoices = new LinkedHashSet<>();
+        defencedChoices.addAll(questionChoices);
+
+        return defencedChoices;
     }
 
     /**
      * 選択肢の数を返します。
+     *
+     * <p>選択肢の数は1以上で不変であることが保証されています。
+     *
      * @return 選択肢の数
      */
     public int getChoiceCount() {
@@ -138,10 +222,31 @@ public class Question {
     }
 
     /**
-     * 正解を返します。
+     * 正解のインデックスを返します。
+     *
+     * <p>正解のインデックスは1から始まり、
+     *    選択肢の範囲内であることが保証されています。
+     *
      * @return 正解
      */
     public int getAnswerIndex() {
         return answerIndex;
+    }
+
+    /**
+     * このクラスの文字列表現を返します。
+     *
+     * <p>
+     *     例：{@code "Question{state:"弦楽器はどれ?" choices:3　answer-index:2 answer:"チェロ"}"}
+     * </p>
+     * @return 文字列表現
+     */
+    @Override
+    public String toString() {
+        return String.format("Question{state:\"%s\" choices:%d　answer-index:%d answer:\"%s\"}",
+                questionStatement,
+                questionChoices.size(),
+                answerIndex,
+                questionChoices.get(answerIndex - 1));
     }
 }
