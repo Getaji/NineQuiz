@@ -5,6 +5,8 @@ import lombok.Data;
 /**
  * クイズロジックに用いるデータのコンテナクラスです。
  * 主に{@link QuizLogic}によって使用されます。
+ *
+ * @author Getaji
  */
 @Data
 public class QuizLogicData {

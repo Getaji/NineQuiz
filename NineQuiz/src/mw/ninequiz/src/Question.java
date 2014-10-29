@@ -15,6 +15,8 @@ import java.util.*;
  *     <li>正解インデックスは1から始まり選択肢の範囲内である。</li>
  *     <li>選択肢はnull・空ではなく重複しない。</li>
  * </ul>
+ *
+ * @author Getaji
  */
 public class Question {
 

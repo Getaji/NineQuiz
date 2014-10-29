@@ -5,6 +5,8 @@ import java.util.List;
 
 /**
  * さんぷる。
+ *
+ * @author Getaji
  */
 public class Main {
 

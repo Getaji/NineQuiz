@@ -9,6 +9,8 @@ import java.util.stream.Stream;
 
 /**
  * クイズロジックのヘルパークラスです。
+ *
+ * @author Getaji
  */
 public class QuizLogicHelper {
 

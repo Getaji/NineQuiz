@@ -6,6 +6,8 @@ import java.util.*;
  * クイズを実行するロジッククラスです。
  * 問題を渡して{@link #start()}を呼ぶとクイズが開始され、標準入力から解答を受け取ります。
  * 正誤は即座に出力され、最後にすべての結果が表示されます。
+ *
+ * @author Getaji
  */
 public class QuizLogic {
 
